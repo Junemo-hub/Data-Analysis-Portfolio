@@ -1,0 +1,7 @@
+# .gitignore 예시
+*.db
+*.pyc
+__pycache__/
+.ipynb_checkpoints/
+.DS_Store
+*.Rproj
