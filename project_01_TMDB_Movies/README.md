@@ -16,6 +16,7 @@ This analysis focuses on the year-over-year trend of ROI (Return on Investment) 
 - Compare ROI by production company
 - Identify high-ROI movies and their common traits
 
+```
 project/
 ├── data/ # Original dataset
 │ └── tmdb_5000_movies.csv
@@ -35,3 +36,4 @@ project/
 ├── run_sql.py # Python script to execute SQL files
 ├── tmdb.db # SQLite database file
 └── README.md # Project summary
+```
