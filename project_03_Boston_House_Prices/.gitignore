@@ -1,0 +1,32 @@
+# For Jupyter & Python
+.ipynb_checkpoints/
+__pycache__/
+*.py[cod]
+*.log
+*.swp
+
+# System & IDE
+.DS_Store
+.vscode/
+.idea/
+
+# Virtual Envs
+env/
+venv/
+.venv/
+
+# Optional: data/model files
+/data/
+/outputs/tmp/
+*.joblib
+
+# Allow important models and data explicitly
+!X_train.pkl
+!X_test.pkl
+!y_train.pkl
+!y_test.pkl
+!linear_model.pkl
+!ridge_model.pkl
+!rf_model.pkl
+!scaler.pkl
+!boston_clean.csv
