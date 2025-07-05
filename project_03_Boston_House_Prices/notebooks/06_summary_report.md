@@ -1,52 +1,60 @@
-# 06_summary_report.md
+```
+# 📘 Project Summary: Boston Housing Price Prediction
 
-# 📘 프로젝트 요약: Boston Housing Price Prediction
-
-"이 프로젝트는 보스턴 집값 데이터를 기반으로 다양한 회귀 모델을 비교하고, 각 모델의 성능 및 변수 중요도를 분석하는 작업을 수행했습니다."
-
-## ✅ 1. 프로젝트 단계 요약
-
-- **01_eda.ipynb**: 데이터 분포 및 상관관계 분석
-- **02_preprocessing.ipynb**: 결측치/이상치 처리 및 스케일링 준비
-- **03a~03d_modeling**: Linear, Ridge, Lasso, RandomForest 학습 및 저장
-- **04a~04e_post_analysis**: 모델 평가, 성능 비교, 예측 vs 실제 시각화
-- **05_feature_analysis.ipynb**: 모델별 중요 변수 비교
+This project analyzes the Boston housing dataset using various regression models. We compare their performance and interpret feature importances across models.
 
 ---
 
-## 🏆 2. 모델 성능 비교 (RMSE, R²)
+## ✅ 1. Project Stages Overview
 
-| Model         | RMSE    | R²     |
-|---------------|---------|--------|
-| Linear        | ~4.92   | ~0.67  |
-| Ridge         | ~4.46   | ~0.73  |
-| Lasso         | ~4.93   | ~0.67  |
-| Random Forest | ~2.81   | ~0.89  |
-
-🔍 **Random Forest가 가장 우수한 성능을 보였음.**
+- **01_eda.ipynb**: Exploratory data analysis (distribution, correlation)
+- **02_preprocessing.ipynb**: Missing value handling, outlier removal, feature engineering
+- **03a~03d_modeling**: Training & saving models – Linear, Ridge, Lasso, RandomForest
+- **04a~04e_post_analysis**: Model evaluation & visualization (predictions vs actuals)
+- **05_feature_analysis.ipynb**: Feature importance comparison across models
 
 ---
 
-## 🔍 3. 변수 중요도 인사이트
+## 🏆 2. Model Performance (RMSE, R²)
 
-- 모든 모델에서 `RM`(방 수), `LSTAT`(저소득층 비율)은 공통적으로 중요한 변수
-- Ridge/Lasso는 정규화를 통해 **과적합 방지 + 변수 선택 기능** 제공
-- RandomForest는 **비선형 관계**까지 포착 가능 → `CRIM`, `NOX` 등도 중요하게 판단
+| Model         | RMSE   | R²   |
+|---------------|--------|------|
+| Linear        | 4.92   | 0.67 |
+| Ridge         | 4.92   | 0.67 |
+| Lasso         | 4.93   | 0.67 |
+| Random Forest | 2.81   | 0.89 |
 
----
-
-## 📌 4. 다음에 할 수 있는 것
-
-- 🔬 SHAP 또는 LIME으로 개별 예측 설명 (예정)
-- 📊 Streamlit 대시보드 제작 (선택)
-- 🔁 교호작용 특성, 다항 회귀, 로그 변환 실험
-- 📄 PDF/PPT 요약 리포트 제작 (논리 구조 정리용)
+🔍 **Random Forest achieved the best performance.**
 
 ---
 
-## 🎓 5. 마무리 코멘트
+## 🔍 3. Feature Importance Insights
 
-이 프로젝트는 **데이터 분석과 머신러닝 파이프라인**의 전형을 체험하기에 매우 좋은 예제입니다. 
-- 실무적 사고: "왜 Random Forest가 성능이 좋았을까?"
-- 해석력: "어떤 변수가 중요했고, 왜 그런가?"
-- 확장성: "이제 새로운 데이터를 넣는다면 어떻게 써먹을 수 있을까?"
+- Commonly important features: `RM` (avg. rooms), `LSTAT` (lower income %)
+- **Lasso** applies L1 regularization → performs feature selection
+- **Ridge** applies L2 regularization → reduces overfitting without feature elimination
+- **Random Forest** captures non-linear patterns and interactions
+
+---
+
+## 📌 4. Next Steps (Suggestions)
+
+- 🧠 Apply SHAP or LIME for local interpretability
+- 📊 Build a Streamlit dashboard for interactive insights
+- 🔁 Experiment with polynomial regression, interaction terms, and log transforms
+- 📄 Summarize findings into a PDF/PPT for presentation
+
+---
+
+## 🎓 5. Closing Thoughts
+
+This project demonstrates a complete machine learning workflow,  
+from raw data to model comparison and interpretation.
+
+> - "Why did Random Forest outperform linear models?"
+> - "Which features were consistently important?"
+> - "How would we apply this to new data?"
+
+These are exactly the questions data scientists are expected to answer.
+
+```
