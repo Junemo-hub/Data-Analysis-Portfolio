@@ -1,32 +1,50 @@
-# For Jupyter & Python
+# Jupyter Notebooks
 .ipynb_checkpoints/
+
+# Python Bytecode
 __pycache__/
 *.py[cod]
+*.pyo
+*.so
+
+# Logs and swap files
 *.log
 *.swp
+*.tmp
 
-# System & IDE
+# OS / IDE files
 .DS_Store
+Thumbs.db
 .vscode/
 .idea/
 
-# Virtual Envs
+# Virtual Environments
 env/
 venv/
 .venv/
 
-# Optional: data/model files
-/data/
-/outputs/tmp/
+# Data and Models (ignore by default)
+data/
+outputs/
+*.csv
+*.db
+*.npy
+*.npz
+*.h5
 *.joblib
+*.pkl
+*.sav
 
-# Allow important models and data explicitly
-!X_train.pkl
-!X_test.pkl
-!y_train.pkl
-!y_test.pkl
-!linear_model.pkl
-!ridge_model.pkl
-!rf_model.pkl
-!scaler.pkl
-!boston_clean.csv
+# Allow specific clean datasets or models (optional)
+!outputs/boston_clean.csv
+!outputs/models/linear_model.pkl
+!outputs/models/rf_model.pkl
+!outputs/models/scaler.pkl
+!outputs/X_train.pkl
+!outputs/X_test.pkl
+!outputs/y_train.pkl
+!outputs/y_test.pkl
+
+# Environment and config
+.env
+*.env
