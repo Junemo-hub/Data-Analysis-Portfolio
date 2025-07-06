@@ -7,19 +7,27 @@ A machine learning project for predicting passenger survival on the Titanic usin
 ## 📁 Project Structure
 
 ```
-├── data/ # Original data files from Kaggle
-│ ├── train.csv
-│ ├── test.csv
-│ └── gender_submission.csv
-├── outputs/ # Processed files and submission
-│ ├── clean_train.csv
-│ ├── clean_test.csv
-│ └── submission.csv
+project_01_titanic_ml_project/
+├── data/
+│   ├── train.csv
+│   ├── test.csv
+│   └── gender_submission.csv
+│
+├── outputs/
+│   ├── clean_train.csv
+│   ├── clean_test.csv
+│   └── submission.csv
+│
 ├── notebooks/
-│ ├── 03_model_training.ipynb
-│ └── 05_submission_generator.ipynb
+│   ├── 01_eda_titanic.ipynb
+│   ├── 02_preprocessing.ipynb
+│   ├── 03_model_training.ipynb
+│   ├── 04_test_preprocessing.ipynb
+│   └── 05_submission_generator.ipynb
+│
 ├── scripts/
-│ └── preprocessing.py
+│   └── preprocessing.py
+│
 └── README.md
 ```
 

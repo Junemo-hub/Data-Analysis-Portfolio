@@ -42,14 +42,14 @@ It includes a complete pipeline from data preprocessing to model training, evalu
 ---
 
 ## 📈 Performance Comparison (on Negative Class)
-
+```
 | Model                  | Accuracy | Recall (0) | F1 (0) | AUC   |
 |------------------------|----------|------------|--------|-------|
 | Naive Bayes            | 0.88     | 0.27       | 0.42   | 0.937 |
 | Logistic Regression    | 0.93     | 0.67       | 0.75   | 0.957 |
 | Logistic + Balanced    | 0.91     | **0.81**   | **0.80** | 0.954 |
 | Random Forest + Balanced | 0.92   | 0.78       | 0.77   | 0.955 |
-
+```
 ---
 
 ## 📁 Project Structure

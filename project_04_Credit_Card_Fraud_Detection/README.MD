@@ -7,7 +7,7 @@ This project aims to detect fraudulent credit card transactions using a variety 
 ---
 
 ## 📁 Project Structure
-
+```
 notebooks/
 ├── 01_eda.ipynb # Exploratory Data Analysis
 ├── 02_feature_eng.ipynb # Feature Engineering
@@ -18,7 +18,15 @@ notebooks/
 ├── 04_evaluation.ipynb # Performance Evaluation & Comparison
 ├── 05_visualization.ipynb # ROC, PR Curves & Metric Visuals
 outputs/ # Saved .pkl models & test sets
+```
 
+---
+
+### 📊 Dataset Info
+- `Time`: Seconds elapsed since first transaction in dataset
+- `V1` to `V28`: PCA-transformed anonymized features
+- `Amount`: Transaction amount
+- `Class`: Fraud label (0 = normal, 1 = fraud)
 
 ---
 
@@ -32,6 +40,10 @@ outputs/ # Saved .pkl models & test sets
 | LightGBM      | 0.87   | 0.82      | 0.84 | 0.977  |
 | LGBM+SMOTE    | 0.89   | 0.50      | 0.64 | 0.969  |
 
+
+
+Precision-Recall curves are included, as they provide more informative evaluation than ROC curves under heavy class imbalance.
+
 ---
 
 ## 🧠 Key Insights
@@ -40,6 +52,8 @@ outputs/ # Saved .pkl models & test sets
 - **Random Forest** yields the highest precision with low false positives.
 - **LGBM + SMOTE** improves recall for high-risk applications, but with more false positives.
 - **Logistic** and **Lasso** models are less practical due to imbalance sensitivity.
+
+- **Lasso** failed to generalize due to extreme regularization on sparse, imbalanced data.
 
 ---
 
