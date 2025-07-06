@@ -53,7 +53,7 @@ It includes a complete pipeline from data preprocessing to model training, evalu
 ---
 
 ## 📁 Project Structure
-
+```
 project/
 ├── data/ # Original and preprocessed data
 ├── notebooks/ # Jupyter notebooks for analysis
@@ -72,7 +72,7 @@ project/
 │ ├── evaluation.py
 ├── requirements.txt
 └── README.md
-
+```
 
 ---
 
