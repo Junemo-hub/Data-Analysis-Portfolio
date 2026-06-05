@@ -1,0 +1,303 @@
+###  initial setting ###
+
+setwd("D:/998.Python/Data-Analysis-Portfolio/project_06_total_happiness_R") 
+# data processing
+df <- read.csv("data/full_data.csv") 
+df$year    <- as.integer(df$year)
+df$country <- as.factor(df$country)
+df$region  <- as.factor(df$region)
+key_vars <- c(
+  "happiness_score",
+  "gdp_per_capita",
+  "social_support",
+  "healthy_life_expectancy",
+  "freedom_to_make_life_choices",
+  "generosity",
+  "perceptions_of_corruption"
+)
+
+# drop out the missing values
+df_clean <- na.omit(df)
+df_clean$perceptions_of_corruption[df_clean$perceptions_of_corruption == "N/A"] <- NA
+df_clean <- df_clean[complete.cases(df_clean), ]
+df_clean$perceptions_of_corruption <- as.numeric(df_clean$perceptions_of_corruption)
+
+
+
+# 2015~2022: train , 2023 : test
+train_data <- df_clean[df_clean$year <= 2022, ]
+test_data  <- df_clean[df_clean$year == 2023, ]
+
+str(df_clean)
+
+
+# delete duplicate
+library(dplyr)
+df_clean <- df_clean %>% distinct()
+
+
+
+#### Diagnosis ####
+#1~3 I analyzed the 1~3(Outliers, Leverage, Influential Point).
+library(dplyr)
+library(broom)
+library(ggplot2)
+
+
+all_diagnosis_df <- list()
+for(year in unique(df_clean$year)) {
+  df_year <- df_clean %>% filter(year == !!year)
+  
+  # linear regression (lm)
+  model <- lm(happiness_score ~ gdp_per_capita + social_support + 
+                healthy_life_expectancy + freedom_to_make_life_choices + 
+                generosity + perceptions_of_corruption,
+              data = df_year)
+  
+  # dependent (k), observation (n)
+  k <- length(coef(model)) - 1 # 절편 제외
+  n <- nrow(df_year)
+  
+  # calculate threshold
+  leverage_threshold <- 2 * (k + 1) / n
+  cooks_d_threshold <- 4 / n
+  outlier_threshold <- 3 # 표준화 잔차의 절대값이 3 초과
+  
+  # calculate
+  diag_values <- data.frame(
+    country = df_year$country,
+    year = year,
+    std_residual = rstandard(model),
+    hat_value = hatvalues(model),
+    cooks_d = cooks.distance(model)
+  )
+  
+  # Is it higher than threshold?
+  diag_values <- diag_values %>%
+    mutate(
+      is_outlier = abs(std_residual) > outlier_threshold,
+      is_leverage = hat_value > leverage_threshold,
+      is_influential = cooks_d > cooks_d_threshold,
+      # Check whether it belongs to at least one of them
+      is_problem = is_outlier | is_leverage | is_influential
+    )
+  
+  all_diagnosis_df[[as.character(year)]] <- diag_values
+}
+
+# combine all of data
+combined_diagnosis_df <- bind_rows(all_diagnosis_df)
+
+# filter
+problematic_obs <- combined_diagnosis_df %>%
+  filter(is_problem == TRUE) %>%
+  select(year, country, std_residual, hat_value, cooks_d, is_outlier, is_leverage, is_influential) %>%
+  arrange(year, desc(cooks_d))
+
+## summarize problematic values
+print(problematic_obs)
+
+
+
+##### create report #####
+# install.packages("ggplot2")
+library(ggplot2)
+
+# Cook's D를 기준으로 상위 5~10개 국가만 시각화하거나, is_influential=TRUE인 국가만 사용
+plot_data <- problematic_obs %>%
+  filter(is_influential == TRUE) %>%
+  # Cook's D를 기준으로 상위 10개 국가만 선택하여 그래프를 깔끔하게 유지 (선택 사항)
+  group_by(country) %>%
+  mutate(total_cooks_d = sum(cooks_d)) %>%
+  ungroup() %>%
+  top_n(10, total_cooks_d)
+
+ggplot(plot_data, aes(x = year, y = cooks_d, color = country)) +
+  geom_line(linewidth = 1, alpha = 0.6) +
+  geom_point(size = 3) +
+  
+  # Cook's D가 높은 국가 이름을 점 옆에 표시
+  geom_text(aes(label = ifelse(cooks_d > 0.1, as.character(country), "")), 
+            vjust = -1, hjust = 0.5, size = 3, check_overlap = TRUE) +
+  
+  facet_wrap(~ country) + # 국가별로 그래프 분할
+  labs(
+    title = "Cook's Distance of Influential Countries Over Time",
+    subtitle = "Identifying persistent exceptional cases influencing model coefficients",
+    x = "Year",
+    y = "Cook's Distance (Model Influence)",
+    color = "Country"
+  ) +
+  theme_minimal(base_size = 14) +
+  theme(legend.position = "none",
+        plot.title = element_text(face = "bold"))
+
+
+
+# Dive into Botswana and Rwanda.
+library(dplyr)
+library(ggplot2)
+
+# filtering 2 countries
+target_countries <- c("Botswana", "Rwanda")
+target_data <- combined_diagnosis_df %>%
+  filter(country %in% target_countries)
+
+# change the form of data (to use in ggplot)
+plot_long <- target_data %>%
+  select(year, country, std_residual, hat_value, cooks_d) %>%
+  tidyr::pivot_longer(
+    cols = c(std_residual, hat_value, cooks_d),
+    names_to = "Metric",
+    values_to = "Value"
+  )
+
+# visulization
+ggplot(plot_long, aes(x = year, y = Value, color = Metric, group = Metric)) +
+  geom_line(linewidth = 1) +
+  geom_point(size = 2) +
+  facet_wrap(~ country, scales = "free_y", ncol = 1) +
+  labs(
+    title = "Diagnostic Metrics for Botswana and Rwanda Over Time",
+    subtitle = "Identifying the source of high Cook's Distance (Residual vs. Leverage)",
+    x = "Year",
+    y = "Metric Value"
+  ) +
+  theme_minimal(base_size = 14)
+
+
+
+############ analyze Rwanda ###############
+
+library(dplyr)
+library(ggplot2)
+library(tidyr)
+
+# Define Independent Variables (X-Variables)
+predictors <- c("gdp_per_capita", "social_support", "healthy_life_expectancy", 
+                "freedom_to_make_life_choices", "generosity", "perceptions_of_corruption")
+
+# 1. Data Standardization (Z-Score Calculation)
+# Z-Score: (Value - Mean) / Standard Deviation. 0 represents the mean.
+df_standardized <- df_clean %>%
+  # Standardize across all observations for comparative clarity
+  mutate(across(all_of(predictors), scale)) %>%
+  ungroup()
+
+# 2. Data Preparation: Filter Rwanda and rename groups
+comparison_data_std <- df_standardized %>%
+  mutate(Group = ifelse(country == "Rwanda", "Rwanda", "All Other Countries")) %>%
+  select(Group, country, year, all_of(predictors))
+
+plot_long_std <- comparison_data_std %>%
+  tidyr::pivot_longer(
+    cols = all_of(predictors),
+    names_to = "Variable",
+    values_to = "Z_Score"
+  )
+
+# 3. Visualization: Box Plot with Rwanda's Z-Scores highlighted
+ggplot(plot_long_std, aes(x = Variable, y = Z_Score)) +
+  
+  # 1. Box Plot (Global Distribution Z-Scores)
+  geom_boxplot(aes(fill = Variable), outlier.shape = NA, alpha = 0.4) +
+  
+  # 2. Rwanda's Z-Scores (Points) - Plotting all years
+  geom_point(data = filter(plot_long_std, Group == "Rwanda"), 
+             aes(color = Group), 
+             size = 4, 
+             alpha = 1,
+             position = position_jitter(width = 0.15)) +
+  
+  # 3. Y=0 line (Global Average)
+  geom_hline(yintercept = 0, linetype = "dashed", color = "black", linewidth = 1) +
+  
+  # 4. Labels: Label Rwanda's points with the year
+  geom_text(data = filter(plot_long_std, Group == "Rwanda"),
+            aes(label = year, color = Group),
+            vjust = -1.5, size = 3.5, position = position_jitter(width = 0.15)) +
+  
+  # 5. Facet Wrap
+  facet_wrap(~ Variable, scales = "free_y", ncol = 3) +
+  
+  labs(
+    title = "Rwanda's X-Variable Position: Z-Score Comparison against Global Average",
+    subtitle = "Z-Score: 0 = Global Mean, ±1 = 1 Standard Deviation. Confirming low Leverage.",
+    x = "", 
+    y = "Z-Score (Standard Deviation from Mean)"
+  ) +
+  theme_minimal(base_size = 14) +
+  theme(
+    axis.text.x = element_blank(), 
+    axis.ticks.x = element_blank(),
+    plot.title = element_text(face = "bold"),
+    legend.position = "none"
+  )
+
+
+
+### Analyze Botswana ###################
+library(dplyr)
+library(ggplot2)
+library(tidyr)
+
+# Define Independent Variables (X-Variables)
+predictors <- c("gdp_per_capita", "social_support", "healthy_life_expectancy", 
+                "freedom_to_make_life_choices", "generosity", "perceptions_of_corruption")
+
+# 1. Data Standardization (Z-Score Calculation)
+# Z-Score: (Value - Mean) / Standard Deviation. 0 represents the mean.
+df_standardized <- df_clean %>%
+  mutate(across(all_of(predictors), scale)) %>%
+  ungroup()
+
+# 2. Data Preparation: Filter Botswana data
+comparison_data_std <- df_standardized %>%
+  mutate(Group = ifelse(country == "Botswana", "Botswana", "All Other Countries")) %>%
+  select(Group, country, year, all_of(predictors))
+
+plot_long_std <- comparison_data_std %>%
+  tidyr::pivot_longer(
+    cols = all_of(predictors),
+    names_to = "Variable",
+    values_to = "Z_Score"
+  )
+
+# 3. Visualization: Box Plot with Botswana's Z-Scores highlighted
+ggplot(plot_long_std, aes(x = Variable, y = Z_Score)) +
+  
+  # 1. Box Plot (Global Distribution Z-Scores)
+  geom_boxplot(aes(fill = Variable), outlier.shape = NA, alpha = 0.4) +
+  
+  # 2. Botswana's Z-Scores (Points) - Plotting all years
+  geom_point(data = filter(plot_long_std, Group == "Botswana"), 
+             aes(color = Group), 
+             size = 4, 
+             alpha = 1,
+             position = position_jitter(width = 0.15)) +
+  
+  # 3. Y=0 line (Global Average)
+  geom_hline(yintercept = 0, linetype = "dashed", color = "black", linewidth = 1) +
+  
+  # 4. Labels: Label Botswana's points with the year
+  geom_text(data = filter(plot_long_std, Group == "Botswana"),
+            aes(label = year, color = Group),
+            vjust = -1.5, size = 3.5, position = position_jitter(width = 0.15)) +
+  
+  # 5. Facet Wrap
+  facet_wrap(~ Variable, scales = "free_y", ncol = 3) +
+  
+  labs(
+    title = "Botswana's X Variable Position: Z-Score Comparison Against Global Average",
+    subtitle = "Identifying variables causing high Leverage (X-extremity)",
+    x = "", 
+    y = "Z-Score (Standard Deviation from Mean)"
+  ) +
+  theme_minimal(base_size = 14) +
+  theme(
+    axis.text.x = element_blank(), 
+    axis.ticks.x = element_blank(),
+    plot.title = element_text(face = "bold"),
+    legend.position = "none"
+  )
+
